@@ -1,0 +1,20 @@
+{
+  "name": "citeproc-js-cli",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "author": "Steffan Sluis <steffansluis@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "clean": "rm -rf dist",
+    "build": "yarn run clean && tsc"
+  },
+  "dependencies": {
+    "citeproc": "^2.2.31",
+    "yargs": "^15.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^13.7.0",
+    "@types/yargs": "^15.0.3",
+    "typescript": "^3.7.5"
+  }
+}
