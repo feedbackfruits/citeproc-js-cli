@@ -41,20 +41,20 @@ exports.ALLOWED_OUTPUT_FORMATS = {
 };
 exports.defaultRenderOptions = {
     outputFormat: "html",
-    lang: "en",
-    style: "apa",
+    localePath: 'locales-en-US.xml',
+    stylePath: 'apa.csl',
 };
 function renderCitation(citation, options = exports.defaultRenderOptions) {
-    const { outputFormat, lang, style } = Object.assign(Object.assign({}, exports.defaultRenderOptions), options);
+    const { outputFormat, lang, stylePath, localePath } = Object.assign(Object.assign({}, exports.defaultRenderOptions), options);
     const sys = {
         retrieveLocale: (RFC_5646_language_tag) => {
-            return utils_1.readXML('locales-en-US.xml');
+            return utils_1.readXML(localePath);
         },
         retrieveItem: (id) => {
             return Object.assign({ id }, citation);
         },
     };
-    const styleXML = utils_1.readXML(`${style}.csl`);
+    const styleXML = utils_1.readXML(stylePath);
     const citeproc = new csl.Engine(sys, styleXML, lang);
     citeproc.setOutputFormat(outputFormat);
     citeproc.updateItems(["citation1"]);

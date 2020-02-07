@@ -1,41 +1,32 @@
 import * as yargs from "yargs";
-import { renderCitation, token_article_dict } from "./citeproc";
-import { readFile } from './utils';
+import { renderCitation, RenderOptions } from "./citeproc";
+import { readFile, localePathForLang, pathForLocale, pathForStyle } from './utils';
 
-export type BibliographyOptions = {
-  file: string,
-  lang: string,
-  style: string,
-  outputFormat: string,
-};
-export const defaultBibliographyOptions: BibliographyOptions = {
-  file: '/dev/stdin',
-  lang: 'en',
-  style: 'apa',
-  outputFormat: 'html',
-};
-export function parseOptions(argv: typeof yargs.argv): BibliographyOptions {
-  const file = (argv['file'] === true || argv['file'] === '-') ? "/dev/stdin" : argv['file'] as string;
+export function parseOptions(argv: typeof yargs.argv): RenderOptions {
+  const outputFormat = 'out' in argv ? argv['out'] as any : "text";
+  const stylePath = 'style' in argv ? pathForStyle(argv['style'] as string) as any : undefined;
+  const localePath = 'locale' in argv ? pathForLocale(argv['locale'] as string) as any :
+    'lang' in argv ? localePathForLang(argv['lang'] as string) as any : undefined;
 
   return {
-    ...defaultBibliographyOptions,
-    file
+    outputFormat,
+    ...(stylePath ? { stylePath } : {}),
+    ...(localePath ? { localePath } : {}),
   }
 }
 
 export function bibliography(argv: typeof yargs.argv) {
-  console.log(argv);
+  // console.log(argv);
 
+  const file = (argv['file'] === true || argv['file'] === '-') ? "/dev/stdin" : argv['file'] as string;
   const options = parseOptions(argv);
-  const { file } = options;
-
-  const fileString = readFile(file);
-  // console.log(fileString);
-  const json = JSON.parse(fileString);
 
   if (!file) yargs.showHelp();
   else {
-    const result = renderCitation(json, { outputFormat: "text" });
+    const fileString = readFile(file);
+    const json = JSON.parse(fileString);
+
+    const result = renderCitation(json, options);
     console.log(result);
   }
 }
@@ -52,15 +43,15 @@ yargs
     alias: [ 'output', 'output-format', 'out', 'format' ]
   })
   .option('s', {
-    desc: 'Style',
+    desc: 'Style or path to style',
     alias: [ 'style' ]
   })
   .option('l', {
-    desc: 'Language',
+    desc: 'Language (only used if locale is unspecified)',
     alias: [ 'lang', 'language' ]
   })
   .option('L', {
-    desc: 'Locale',
+    desc: 'Locale or path to locale',
     alias: [ 'locale' ]
   })
   .option('B', {
@@ -72,6 +63,11 @@ yargs
     desc: 'Batch-format',
     alias: [ 'batch-format' ],
     default: 'JSON'
+  })
+  .option('BOS', {
+    desc: 'Batch output-separator',
+    alias: [ 'batch-output-separator' ],
+    default: '\\n'
   })
   .command([ 'bibliography [file] [options]' ], 'Render a bibliography from a file ( - or /dev/stdin for stdin)', (args) => {
     return args

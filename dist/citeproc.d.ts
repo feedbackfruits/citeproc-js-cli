@@ -34,6 +34,8 @@ export declare type RenderOptions = {
     outputFormat?: keyof typeof ALLOWED_OUTPUT_FORMATS;
     lang?: keyof typeof LANGUAGE_TO_LOCALE_MAP;
     style?: keyof typeof STYLES_ABBREVIATIONS;
+    localePath?: string;
+    stylePath?: string;
 };
 export declare const defaultRenderOptions: RenderOptions;
 export declare function renderCitation(citation: Object, options?: RenderOptions): any;
