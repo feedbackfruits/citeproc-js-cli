@@ -8,8 +8,8 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const fs = __importStar(require("fs"));
-function readXML(path) {
-    const xmlString = fs.readFileSync(path).toString();
-    return xmlString;
+function readFile(path) {
+    return fs.readFileSync(path).toString();
 }
-exports.readXML = readXML;
+exports.readFile = readFile;
+exports.readXML = readFile;

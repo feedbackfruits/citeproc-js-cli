@@ -1,7 +1,10 @@
 {
   "name": "citeproc-js-cli",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "main": "dist/index.js",
+  "bin": {
+    "citeproc": "./dist/index.js"
+  },
   "author": "Steffan Sluis <steffansluis@gmail.com>",
   "license": "MIT",
   "scripts": {

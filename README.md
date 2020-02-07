@@ -12,4 +12,3 @@ A wrapper around citeproc-js, written in JavaScript.
   - [ ] HTML output format
   - [ ] Text output format
   - [ ] Batch render
-- [ ] Replicate citeproc-java CLI (?)

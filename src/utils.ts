@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 
-export function readXML(path) {
-  const xmlString = fs.readFileSync(path).toString();
-  return xmlString;
+export function readFile(path) {
+  return fs.readFileSync(path).toString();
 }
+
+export const readXML = readFile;
