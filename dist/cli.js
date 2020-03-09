@@ -15,7 +15,9 @@ function parseOptions(argv) {
     const stylePath = 'style' in argv ? utils_1.pathForStyle(argv['style']) : undefined;
     const localePath = 'locale' in argv ? utils_1.pathForLocale(argv['locale']) :
         'lang' in argv ? utils_1.localePathForLang(argv['lang']) : undefined;
-    return Object.assign(Object.assign({ outputFormat }, (stylePath ? { stylePath } : {})), (localePath ? { localePath } : {}));
+    const batched = 'batch' in argv && !!argv['batch'];
+    return Object.assign(Object.assign({ batched,
+        outputFormat }, (stylePath ? { stylePath } : {})), (localePath ? { localePath } : {}));
 }
 exports.parseOptions = parseOptions;
 function bibliography(argv) {
@@ -25,9 +27,19 @@ function bibliography(argv) {
         yargs.showHelp();
     else {
         const fileString = utils_1.readFile(file);
-        const json = JSON.parse(fileString);
-        const result = citeproc_1.renderCitation(json, options);
-        console.log(result);
+        if (options.batched) {
+            const jsons = fileString.trim().split('\n');
+            const results = jsons.map(jsonString => {
+                const json = JSON.parse(jsonString);
+                return citeproc_1.renderCitation(json, options);
+            });
+            console.log(results.join('\n'));
+        }
+        else {
+            const json = JSON.parse(fileString);
+            const result = citeproc_1.renderCitation(json, options);
+            console.log(result);
+        }
     }
 }
 exports.bibliography = bibliography;

@@ -8,7 +8,10 @@ export function parseOptions(argv: typeof yargs.argv): RenderOptions {
   const localePath = 'locale' in argv ? pathForLocale(argv['locale'] as string) as any :
     'lang' in argv ? localePathForLang(argv['lang'] as string) as any : undefined;
 
+  const batched = 'batch' in argv && !!argv['batch'];
+
   return {
+    batched,
     outputFormat,
     ...(stylePath ? { stylePath } : {}),
     ...(localePath ? { localePath } : {}),
@@ -24,10 +27,21 @@ export function bibliography(argv: typeof yargs.argv) {
   if (!file) yargs.showHelp();
   else {
     const fileString = readFile(file);
-    const json = JSON.parse(fileString);
+    if (options.batched) {
+      const jsons = fileString.trim().split('\n')
+      const results = jsons.map(jsonString => {
+        const json = JSON.parse(jsonString);
+        return renderCitation(json, options);
+      })
 
-    const result = renderCitation(json, options);
-    console.log(result);
+      console.log(results.join('\n'));
+
+    } else {
+      const json = JSON.parse(fileString);
+
+      const result = renderCitation(json, options);
+      console.log(result);
+    }
   }
 }
 

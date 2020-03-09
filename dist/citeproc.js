@@ -40,6 +40,7 @@ exports.ALLOWED_OUTPUT_FORMATS = {
     "rtf": "rtf",
 };
 exports.defaultRenderOptions = {
+    batched: false,
     outputFormat: "html",
     localePath: 'locales-en-US.xml',
     stylePath: 'apa.csl',

@@ -31,6 +31,7 @@ export declare const ALLOWED_OUTPUT_FORMATS: {
     "rtf": string;
 };
 export declare type RenderOptions = {
+    batched: boolean;
     outputFormat?: keyof typeof ALLOWED_OUTPUT_FORMATS;
     lang?: keyof typeof LANGUAGE_TO_LOCALE_MAP;
     style?: keyof typeof STYLES_ABBREVIATIONS;

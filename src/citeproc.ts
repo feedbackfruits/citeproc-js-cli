@@ -37,6 +37,7 @@ export const ALLOWED_OUTPUT_FORMATS = {
 };
 
 export type RenderOptions = {
+  batched: boolean,
   outputFormat?: keyof typeof ALLOWED_OUTPUT_FORMATS,
   lang?: keyof typeof LANGUAGE_TO_LOCALE_MAP,
   style?: keyof typeof STYLES_ABBREVIATIONS,
@@ -45,6 +46,7 @@ export type RenderOptions = {
 };
 
 export const defaultRenderOptions: RenderOptions = {
+  batched: false,
   outputFormat: "html",
   localePath: 'locales-en-US.xml',
   stylePath: 'apa.csl',
