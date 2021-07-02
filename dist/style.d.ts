@@ -7,4 +7,5 @@ export declare const STYLES_ABBREVIATIONS: {
     'mla': string;
     'acm': string;
     'vancouver': string;
+    'harvard': string;
 };

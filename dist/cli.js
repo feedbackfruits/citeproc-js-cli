@@ -43,16 +43,35 @@ function bibliography(argv) {
     }
 }
 exports.bibliography = bibliography;
+function citations(argv) {
+    const file = (argv['file'] === true || argv['file'] === '-') ? "/dev/stdin" : argv['file'];
+    const options = parseOptions(argv);
+    if (!file)
+        yargs.showHelp();
+    else {
+        const fileString = utils_1.readFile(file);
+        const jsonStrings = fileString.trim().split('\n');
+        const jsons = jsonStrings.map(str => JSON.parse(str));
+        const isCitation = json => 'type' in json && json.type == 'citation';
+        const bibliography = jsons.filter(json => !isCitation(json));
+        const citations = jsons.filter(isCitation);
+        const result = citeproc_1.renderInTextCitations(bibliography, citations, options);
+        console.log(JSON.stringify(result));
+    }
+}
+exports.citations = citations;
 yargs
-    .usage('Usage: $0 [bibliography] [file] [options]')
-    .example('cat reference.json | $0 bibliography -', 'count the lines in the given file')
+    .usage('Usage: $0 [bibliography|citations] [file] [options]')
+    .example('cat reference.json | $0 bibliography -', 'Render a bibliography from stdin')
+    .example('cat reference.json | $0 citations -', 'Render in-text citations from stdin')
     .option('i', {
     desc: 'Input file',
     alias: ['input', 'input-file', 'in', 'file']
 })
     .option('o', {
     desc: 'Output format',
-    alias: ['output', 'output-format', 'out', 'format']
+    alias: ['output', 'output-format', 'out', 'format'],
+    default: 'text'
 })
     .option('s', {
     desc: 'Style or path to style',
@@ -85,6 +104,10 @@ yargs
     return args
         .usage('Usage: $0 bibliography [file] [options]');
 }, bibliography)
+    .command(['citations [file] [options]'], 'Render in-text citations from a file ( - or /dev/stdin for stdin)', (args) => {
+    return args
+        .usage('Usage: $0 citations [file] [options]');
+}, citations)
     .demandCommand()
     .help('h')
     .alias('h', 'help')

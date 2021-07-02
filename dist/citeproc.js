@@ -9,6 +9,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const csl = __importStar(require("citeproc"));
 const utils_1 = require("./utils");
+const uuid_1 = require("uuid");
 exports.token_article_dict = {
     'type': 'article-journal',
     'title': 'The varieties of capitalism and hybrid success',
@@ -41,7 +42,7 @@ exports.ALLOWED_OUTPUT_FORMATS = {
 };
 exports.defaultRenderOptions = {
     batched: false,
-    outputFormat: "html",
+    outputFormat: "text",
     localePath: 'locales-en-US.xml',
     stylePath: 'apa.csl',
 };
@@ -63,3 +64,60 @@ function renderCitation(citation, options = exports.defaultRenderOptions) {
     return result[0].trim();
 }
 exports.renderCitation = renderCitation;
+function renderInTextCitations(bibliography, citations, options = exports.defaultRenderOptions) {
+    const { outputFormat, lang, stylePath, localePath } = Object.assign(Object.assign({}, exports.defaultRenderOptions), options);
+    const bibliographyMap = bibliography.reduce((memo, _reference) => {
+        const id = uuid_1.v4();
+        const reference = Object.assign({ id }, _reference);
+        memo[reference["id"]] = reference;
+        return memo;
+    }, {});
+    const bibliographyWithId = Object.values(bibliographyMap);
+    let citedReferenceIds = {};
+    const citationsWithId = citations.map((citation, index) => {
+        const id = uuid_1.v4();
+        const referenceIds = citation['reference_indices'].map(index => bibliographyWithId[index]["id"]);
+        const citationItems = referenceIds.map(id => ({ id }));
+        citedReferenceIds = Object.assign(Object.assign({}, citedReferenceIds), referenceIds.map(id => ({ [id]: true })));
+        return Object.assign(Object.assign({ id, citationID: id }, citation), { properties: {
+                noteIndex: index + 1
+            }, citationItems });
+    });
+    const sys = {
+        retrieveLocale: (RFC_5646_language_tag) => {
+            return utils_1.readXML(localePath);
+        },
+        retrieveItem: (id) => {
+            return bibliographyMap[id];
+        },
+    };
+    const styleXML = utils_1.readXML(stylePath);
+    const citeproc = new csl.Engine(sys, styleXML, lang);
+    citeproc.setOutputFormat(outputFormat);
+    const { results } = citationsWithId.reduce((memo, citation, index) => {
+        const [status, citationResults] = citeproc.processCitationCluster(citation, memo.citationsPre, memo.citationsPost);
+        const results = citationResults.reduce((memo, result) => {
+            const [index, rendered, id] = result;
+            memo[id] = rendered;
+            return memo;
+        }, Object.assign({}, memo.results));
+        const uncitedReferenceIds = Object.keys(bibliographyMap).filter(key => !(key in citedReferenceIds));
+        citeproc.updateUncitedItems(uncitedReferenceIds);
+        return {
+            results: results,
+            citationsPre: [...memo.citationsPre, [citation["id"], index + 1]],
+            citationsPost: [],
+        };
+    }, { citationsPre: [], citationsPost: [], results: {} });
+    const [formattingParameters, renderedBibliography] = citeproc.makeBibliography();
+    const result = {
+        bibiography: {
+            outputFormat,
+            formattingParameters,
+            renderedBibliography
+        },
+        citations: results
+    };
+    return result;
+}
+exports.renderInTextCitations = renderInTextCitations;
