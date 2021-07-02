@@ -40,3 +40,11 @@ export declare type RenderOptions = {
 };
 export declare const defaultRenderOptions: RenderOptions;
 export declare function renderCitation(citation: Object, options?: RenderOptions): any;
+export declare function renderInTextCitations(bibliography: Object[], citations: Object[], options?: RenderOptions): {
+    bibiography: {
+        outputFormat: "html" | "text" | "asciidoc" | "fo" | "rtf";
+        formattingParameters: any;
+        renderedBibliography: any;
+    };
+    citations: any;
+};

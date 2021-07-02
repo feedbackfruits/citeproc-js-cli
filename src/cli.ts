@@ -1,5 +1,5 @@
 import * as yargs from "yargs";
-import { renderCitation, RenderOptions } from "./citeproc";
+import { renderCitation, renderInTextCitations, RenderOptions } from "./citeproc";
 import { readFile, localePathForLang, pathForLocale, pathForStyle } from './utils';
 
 export function parseOptions(argv: typeof yargs.argv): RenderOptions {
@@ -19,8 +19,6 @@ export function parseOptions(argv: typeof yargs.argv): RenderOptions {
 }
 
 export function bibliography(argv: typeof yargs.argv) {
-  // console.log(argv);
-
   const file = (argv['file'] === true || argv['file'] === '-') ? "/dev/stdin" : argv['file'] as string;
   const options = parseOptions(argv);
 
@@ -45,16 +43,36 @@ export function bibliography(argv: typeof yargs.argv) {
   }
 }
 
+export function citations(argv: typeof yargs.argv) {
+  const file = (argv['file'] === true || argv['file'] === '-') ? "/dev/stdin" : argv['file'] as string;
+  const options = parseOptions(argv);
+
+  if (!file) yargs.showHelp();
+  else {
+    const fileString = readFile(file);
+    const jsonStrings = fileString.trim().split('\n')
+    const jsons = jsonStrings.map(str => JSON.parse(str));
+    const isCitation = json => 'type' in json && json.type == 'citation';
+    const bibliography = jsons.filter(json => !isCitation(json));
+    const citations = jsons.filter(isCitation);
+
+    const result = renderInTextCitations(bibliography, citations, options);
+    console.log(JSON.stringify(result));
+  }
+}
+
 yargs
-  .usage('Usage: $0 [bibliography] [file] [options]')
-  .example('cat reference.json | $0 bibliography -', 'count the lines in the given file')
+  .usage('Usage: $0 [bibliography|citations] [file] [options]')
+  .example('cat reference.json | $0 bibliography -', 'Render a bibliography from stdin')
+  .example('cat reference.json | $0 citations -', 'Render in-text citations from stdin')
   .option('i', {
     desc: 'Input file',
     alias: [ 'input', 'input-file', 'in', 'file' ]
   })
   .option('o', {
     desc: 'Output format',
-    alias: [ 'output', 'output-format', 'out', 'format' ]
+    alias: [ 'output', 'output-format', 'out', 'format' ],
+    default: 'text'
   })
   .option('s', {
     desc: 'Style or path to style',
@@ -87,6 +105,10 @@ yargs
     return args
       .usage('Usage: $0 bibliography [file] [options]')
   }, bibliography)
+  .command([ 'citations [file] [options]' ], 'Render in-text citations from a file ( - or /dev/stdin for stdin)', (args) => {
+    return args
+      .usage('Usage: $0 citations [file] [options]')
+  }, citations)
   .demandCommand()
   .help('h')
   .alias('h', 'help')

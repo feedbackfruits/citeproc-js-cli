@@ -7,4 +7,5 @@ export const STYLES_ABBREVIATIONS = {
   'mla': 'modern-language-association',
   'acm': 'association-for-computing-machinery',
   'vancouver': 'vancouver',
+  'harvard': 'elsevier-harvard'
 };
