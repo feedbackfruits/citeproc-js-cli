@@ -12,7 +12,7 @@
     "build": "yarn run clean && tsc"
   },
   "dependencies": {
-    "citeproc": "^2.2.31",
+    "citeproc": "^2.4.63",
     "uuid": "^8.3.2",
     "yargs": "^15.1.0"
   },
